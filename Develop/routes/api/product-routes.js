@@ -2,18 +2,48 @@ const router = require('express').Router();
 const { Product, Category, Tag, ProductTag } = require('../../models');
 
 // The `/api/products` endpoint
-
 // get all products
 router.get('/', (req, res) => {
   // find all products
-  // be sure to include its associated Category and Tag data
+  Product.findAll({
+    include: [
+      { model: Category }, // Include the associated Category data
+      { model: Tag },      // Include the associated Tag data
+    ],
+  })
+    .then((products) => {
+      res.status(200).json(products);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
-// get one product
+/// get one product
 router.get('/:id', (req, res) => {
-  // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
+  const productId = req.params.id;
+
+  // Find a single product by its ID and include associated Category and Tag data
+  Product.findOne({
+    where: { id: productId },
+    include: [
+      { model: Category }, // Include the associated Category data
+      { model: Tag },      // Include the associated Tag data
+    ],
+  })
+    .then((product) => {
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' });
+      }
+      res.status(200).json(product);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
+
 
 // create new product
 router.post('/', (req, res) => {
@@ -82,6 +112,7 @@ router.put('/:id', (req, res) => {
             ProductTag.bulkCreate(newProductTags),
           ]);
         });
+      
       }
 
       return res.json(product);
@@ -91,9 +122,30 @@ router.put('/:id', (req, res) => {
       res.status(400).json(err);
     });
 });
-
 router.delete('/:id', (req, res) => {
-  // delete one product by its `id` value
+  const productId = req.params.id;
+
+  // Delete the product by its ID
+  Product.destroy({
+    where: { id: productId },
+  })
+    .then((deletedProduct) => {
+      if (!deletedProduct) {
+        return res.status(404).json({ message: 'Product not found' });
+      }
+      // Also delete associated ProductTags
+      return ProductTag.destroy({
+        where: { product_id: productId },
+      });
+    })
+    .then(() => {
+      res.status(204).end(); // 204 No Content response on successful deletion
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 module.exports = router;
+
