@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+//import database connection form config folder
 const sequelize = require('../config/connection');
 
 // Initialize Product model (table) by extending off Sequelize's Model class
