@@ -1,5 +1,5 @@
 {
-  "name": "ORR-BACKEND",
+  "name": "ORM-BACKEND",
   "version": "1.0.0",
   "description": "Back end for an e-commerce site built with Express.js API to use Sequelize to interact with a MySQL database.",
   "main": "server.js",
